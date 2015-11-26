@@ -131,16 +131,17 @@ public class Main {
                 User u = users.get(id);
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
-                    for (Object key_item_similar : items.get(key).similarities.keySet()) {
-                        if (u.ratings.containsKey(key_item_similar)) continue;
-                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar);
+                    for (Object key_item_similar_o : items.get(key).similarities.similarities) {
+                        Similarity_Key_Value key_item_similar = (Similarity_Key_Value)key_item_similar_o;
+                        if (u.ratings.containsKey(key_item_similar.key)) continue;
+                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar.key).value;
                         SimilarityPair pair = u.estimated_ratings.get(key_item_similar);
                         if (pair != null) {
                             pair.rating_sum += value;
-                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar);
+                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar.key).value;
                         } else {
-                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar));
-                            u.estimated_ratings.put((Integer)key_item_similar, pair);
+                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar.key).value);
+                            u.estimated_ratings.put((Integer)key_item_similar.key, pair);
                         }
                     }
                 }
@@ -164,9 +165,9 @@ public class Main {
             //System.out.println("item id: " + key_item.toString());
             temp_similarity.clear();
             for (Feature feature : item.feautures) {
-                if (feature.items.size() < 500)
                     for (Item similar_item : feature.items) {
                         if (similar_item.id == key_item) continue;
+                        if (item.feautures.size() >  similar_item.feautures.size()) continue;
                         if (temp_similarity.containsKey(similar_item.id)) { //increment
                             temp_similarity.put(similar_item.id, temp_similarity.get(similar_item.id) + 1);
                         } else {
@@ -178,20 +179,21 @@ public class Main {
             //divide the norm
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
-                value = value / ((item.norm * items.get(key).norm) + 7.0f /*shrink term */);
-                temp_similarity.put((Integer) key, value);
+                value = value / ((item.norm * items.get(key).norm) + 2.0f /*shrink term */);
+                setSimilarity((Integer)key_item, (Integer)key, value);
             }
-
+            /* THIS PART IS COMMENTED BECAUSE THE LITS IS ALREADY KEPT SORTED
             //sort the similarity
             LinkedHashMap sortedHash = sortHashMapByValuesD(temp_similarity,false);
             Iterator it = sortedHash.keySet().iterator();
             int count = 0;
             while (it.hasNext() && count < 50) {
                 Object key = it.next();
-                item.similarities.put((Integer) key, (Float) sortedHash.get(key));
+                setSimilarity((Integer) key, (Integer)key_item, (Float) sortedHash.get(key));
                 count++;
             }
             //System.out.println("item id: " + key_item.toString() + " finished");
+            */
         }
     }
 
@@ -252,6 +254,13 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+
+    private static void setSimilarity(Integer item1, Integer item2, float value) {
+        items.get(item2).similarities.add(item1,value);
+        items.get(item1).similarities.add(item2,value);
     }
 }
 
