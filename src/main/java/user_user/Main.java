@@ -16,7 +16,7 @@ public class Main {
     static Map<Integer, User> users = new HashMap<Integer, User>();
     static List<MovieRating> top_movies = new ArrayList<MovieRating>();
     static List<Recommendation> recommendations = new ArrayList<Recommendation>();
-    private static String mainPath = "D:\\Yedek\\desktop backup 23-02-2015\\polimi 2nd year\\Recommender Systems\\competition\\user-user\\";
+    private static String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\user-user\\";
 
     public static LinkedHashMap sortHashMapByValuesD(Map passedMap) {
         List mapKeys = new ArrayList(passedMap.keySet());

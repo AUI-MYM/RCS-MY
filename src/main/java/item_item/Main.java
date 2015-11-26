@@ -16,7 +16,7 @@ import java.util.*;
  * Created by MertErgun on 3.11.2015.
  */
 public class Main {
-    public static final String mainPath = "D:\\Yedek\\desktop backup 23-02-2015\\polimi 2nd year\\Recommender Systems\\competition\\item-item\\";
+    public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\item-item\\";
     private static Map<Integer, Item> items = new HashMap<Integer, Item>();
     private static Map<Integer, Feature> features = new HashMap<Integer, Feature>();
     static Map<Integer, User> users = new HashMap<Integer, User>();
@@ -178,7 +178,7 @@ public class Main {
             //divide the norm
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
-                value = value / ((item.norm * items.get(key).norm) + 2.5f /*shrink term */);
+                value = value / ((item.norm * items.get(key).norm) + 7.0f /*shrink term */);
                 temp_similarity.put((Integer) key, value);
             }
 
