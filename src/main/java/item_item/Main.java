@@ -146,7 +146,7 @@ public class Main {
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
-                    pair.rating_sum = pair.rating_sum / pair.similarity_sum;
+                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 1.0f);
                 }
                 recommendations.add(r);
             }
@@ -178,7 +178,7 @@ public class Main {
             //divide the norm
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
-                value = value / ((item.norm * items.get(key).norm) + 7.0f /*shrink term */);
+                value = value / ((item.norm * items.get(key).norm) + 2.0f /*shrink term */);
                 temp_similarity.put((Integer) key, value);
             }
 
