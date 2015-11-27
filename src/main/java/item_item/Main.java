@@ -147,7 +147,7 @@ public class Main {
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
-                    pair.rating_sum = pair.rating_sum / pair.similarity_sum;
+                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f);
                 }
                 recommendations.add(r);
             }

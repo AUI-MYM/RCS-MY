@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
  * This class is written in order to keep a sorted list which has the size 50
  */
 public class Similarity {
-    private final static int max_number_of_similarity = 50;
+    private final static int max_number_of_similarity = 100;
     SortedArrayList similarities = new SortedArrayList();
     public void add(Integer key, Float value) {
         if (similarities.size() >= max_number_of_similarity) {
