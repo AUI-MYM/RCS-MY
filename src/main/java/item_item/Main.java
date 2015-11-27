@@ -72,16 +72,23 @@ public class Main {
 
     public static void main(String[] args) {
         readNorms();
+        System.out.println("Norm file has been read");
         readItems();
+        System.out.println("Items have been read");
         readTrain();
+        System.out.println("Train data was read");
         computeSimilarity();
+        System.out.println("End of calculation of similarity");
         recommend();
+        System.out.println("End of predicting ratings");
         writeOutput();
+        System.out.println("End of writing the top 5 best prediction");
     }
 
     private static void writeOutput() {
         CSVWriter writer = null;
         CSVReader reader = null;
+        int counter = 0;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
             reader = new CSVReader(new FileReader(mainPath + "submit_user.csv"));
@@ -91,7 +98,7 @@ public class Main {
             String[] line = null;
             for (Recommendation r : recommendations) {
                 User theUser = users.get(r.user);
-                LinkedHashMap list = sortHashMapByValuesD(theUser.estimated_ratings,true);
+                LinkedHashMap list = sortHashMapByValuesD(theUser.estimated_ratings, true);
                 Iterator it = list.keySet().iterator();
                 int count = 0;
                 while (count < 5 && it.hasNext()) {
@@ -102,6 +109,7 @@ public class Main {
                 if (count < 5) {
                     String[] items = line[1].split(" ");
                     int i = 0;
+                    counter++;
                     while (count < 5) {
                         int item = Integer.parseInt(items[i]);
                         if (!r.recommendations.contains(item)) {
@@ -119,6 +127,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("For " + counter + " many users I couldn't predict 5 movies");
     }
 
     private static void recommend() {
@@ -132,7 +141,7 @@ public class Main {
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
                     for (Object key_item_similar_o : items.get(key).similarities.similarities) {
-                        Similarity_Key_Value key_item_similar = (Similarity_Key_Value)key_item_similar_o;
+                        Similarity_Key_Value key_item_similar = (Similarity_Key_Value) key_item_similar_o;
                         if (u.ratings.containsKey(key_item_similar.key)) continue;
                         float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar.key).value;
                         SimilarityPair pair = u.estimated_ratings.get(key_item_similar);
@@ -141,7 +150,7 @@ public class Main {
                             pair.similarity_sum += items.get(key).similarities.get(key_item_similar.key).value;
                         } else {
                             pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar.key).value);
-                            u.estimated_ratings.put((Integer)key_item_similar.key, pair);
+                            u.estimated_ratings.put((Integer) key_item_similar.key, pair);
                         }
                     }
                 }
@@ -165,22 +174,22 @@ public class Main {
             //System.out.println("item id: " + key_item.toString());
             temp_similarity.clear();
             for (Feature feature : item.feautures) {
-                    for (Item similar_item : feature.items) {
-                        if (similar_item.id == key_item) continue;
-                        if (item.feautures.size() >  similar_item.feautures.size()) continue;
-                        if (temp_similarity.containsKey(similar_item.id)) { //increment
-                            temp_similarity.put(similar_item.id, temp_similarity.get(similar_item.id) + 1);
-                        } else {
-                            temp_similarity.put(similar_item.id, 1.0f);
-                        }
+                for (Item similar_item : feature.items) {
+                    if (similar_item.id == key_item) continue;
+                    if (item.feautures.size() > similar_item.feautures.size()) continue;
+                    if (temp_similarity.containsKey(similar_item.id)) { //increment
+                        temp_similarity.put(similar_item.id, temp_similarity.get(similar_item.id) + 1);
+                    } else {
+                        temp_similarity.put(similar_item.id, 1.0f);
                     }
+                }
             }
 
             //divide the norm
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
                 value = value / ((item.norm * items.get(key).norm) + 2.0f /*shrink term */);
-                setSimilarity((Integer)key_item, (Integer)key, value);
+                setSimilarity((Integer) key_item, (Integer) key, value);
             }
             /* THIS PART IS COMMENTED BECAUSE THE LITS IS ALREADY KEPT SORTED
             //sort the similarity
@@ -221,7 +230,7 @@ public class Main {
                 if (comp1.equals(comp2)) {
                     passedMap.remove(key);
                     mapKeys.remove(key);
-                    sortedMap.put((Integer) key,val);
+                    sortedMap.put((Integer) key, val);
                     break;
                 }
 
@@ -257,10 +266,11 @@ public class Main {
     }
 
 
-
     private static void setSimilarity(Integer item1, Integer item2, float value) {
-        items.get(item2).similarities.add(item1,value);
-        items.get(item1).similarities.add(item2,value);
+        if (value > 0.19f) {
+            items.get(item2).similarities.add(item1, value);
+            items.get(item1).similarities.add(item2, value);
+        }
     }
 }
 
