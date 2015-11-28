@@ -10,12 +10,12 @@ import java.util.*;
 public class Item {
     public float norm;
     public int id;
-    public LinkedHashMap<Integer,Float> similarities;
+    public SortedList similarities;
     public List<Feature> feautures;
     public Map<Integer,Integer> ratings;
     public Item(int id) {
         this.id = id;
-        similarities = new LinkedHashMap<Integer, Float>();
+        similarities = new SortedList();
         ratings = new HashMap<Integer, Integer>();
         feautures = new ArrayList<Feature>();
     }
@@ -23,7 +23,7 @@ public class Item {
     public Item(int id, float v) {
         this.id = id;
         this.norm = v;
-        this.similarities = new LinkedHashMap<Integer, Float>();
+        this.similarities = new SortedList();
         this.feautures = new ArrayList<Feature>();
         ratings = new HashMap<Integer, Integer>();
     }

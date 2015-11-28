@@ -42,16 +42,22 @@ public class Main {
 
     public static void main(String[] args) {
         readNorms("norm_item_ratings.csv");
+        System.out.println("Norm file has been read");
+        System.out.println("Items have been read");
         readTrain();
+        System.out.println("Train data was read");
         computeSimilarity_by_collaborative();
-        writeSim();
+        System.out.println("End of calculation of similarity");
         recommend();
+        System.out.println("End of predicting ratings");
         writeOutput();
+        System.out.println("End of writing the top 5 best prediction");
     }
 
     private static void writeOutput() {
         CSVWriter writer = null;
         CSVReader reader = null;
+        int counter = 0 ;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
             reader = new CSVReader(new FileReader(mainPath + "submit_user.csv"));
@@ -61,17 +67,18 @@ public class Main {
             String[] line = null;
             for (Recommendation r : recommendations) {
                 User theUser = users.get(r.user);
-                LinkedHashMap list = sortHashMapByValuesD(theUser.estimated_ratings,true);
-                Iterator it = list.keySet().iterator();
+                //LinkedHashMap list = sortHashMapByValuesD(theUser.estimated_ratings,true);
+                Iterator it = theUser.estimated_sorted_ratings.theList.iterator();
                 int count = 0;
                 while (count < 5 && it.hasNext()) {
-                    r.recommendations.add((Integer) it.next());
+                    r.recommendations.add(((Key_Value_Pair) it.next()).key);
                     count++;
                 }
                 line = reader.readNext();
                 if (count < 5) {
                     String[] items = line[1].split(" ");
                     int i = 0;
+                    counter++;
                     while (count < 5) {
                         int item = Integer.parseInt(items[i]);
                         if (!r.recommendations.contains(item)) {
@@ -89,28 +96,9 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("For " + counter + " many users I couldn't predict 5 movies");
     }
 
-    private static void writeSim() {
-        CSVWriter writer = null;
-        CSVReader reader = null;
-        try {
-            writer = new CSVWriter(new FileWriter(mainPath + "sim_com.csv"), ',');
-            for (Integer key : items.keySet()) {
-                Item item = items.get(key);
-                String s = "";
-                for (Integer key2 : item.similarities.keySet()) {
-                    s += key2 + ",";
-                    s += item.similarities.get(key2) + ",";
-                }
-                writer.writeNext(s.split(","));
-            }
-
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     private static void recommend() {
         try {
             CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
@@ -121,23 +109,26 @@ public class Main {
                 User u = users.get(id);
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
-                    for (Object key_item_similar : items.get(key).similarities.keySet()) {
-                        if (u.ratings.containsKey(key_item_similar)) continue;
-                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar);
+                    for (Object key_item_similar_o : items.get(key).similarities.theList) {
+                        Key_Value_Pair key_item_similar = (Key_Value_Pair) key_item_similar_o;
+                        if (u.ratings.containsKey(key_item_similar.key)) continue;
+                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar.key).value;
                         SimilarityPair pair = u.estimated_ratings.get(key_item_similar);
                         if (pair != null) {
                             pair.rating_sum += value;
-                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar);
+                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar.key).value;
                         } else {
-                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar));
-                            u.estimated_ratings.put((Integer)key_item_similar, pair);
+                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar.key).value);
+                            u.estimated_ratings.put((Integer) key_item_similar.key, pair);
                         }
                     }
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
                     pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f);
+                    u.estimated_sorted_ratings.add((Integer)key, pair.rating_sum);
                 }
+                u.estimated_ratings.clear();
                 recommendations.add(r);
             }
             reader.close();
@@ -159,6 +150,7 @@ public class Main {
                 if (theUser == null || theUser.ratings == null) continue;
                 for (Integer key_item_rated : theUser.ratings.keySet()) {
                     if (key_item_rated.equals(key_item)) continue;
+                    if (item.ratings.size() > items.get(key_item_rated).ratings.size()) continue;
                     float rating = item.ratings.get(key_user) * theUser.ratings.get(key_item_rated);
                     obj = temp_similarity.get(key_item_rated);
                     if (obj == null) {
@@ -174,17 +166,7 @@ public class Main {
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
                 value = value / ((item.norm * items.get(key).norm) + 2.0f /* shrink term */);
-                temp_similarity.put((Integer) key, value);
-            }
-
-            //sort the similarity
-            LinkedHashMap sortedHash = sortHashMapByValuesD(temp_similarity,false);
-            Iterator it = sortedHash.keySet().iterator();
-            int count = 0;
-            while (it.hasNext() && count < 50) {
-                Object key = it.next();
-                item.similarities.put((Integer) key, (Float) sortedHash.get(key));
-                count++;
+                setSimilarity((Integer) key, key_item ,value);
             }
 
         }
@@ -249,6 +231,11 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void setSimilarity(Integer item1, Integer item2, float value) {
+        items.get(item2).similarities.add(item1, value);
+        items.get(item1).similarities.add(item2, value);
     }
 }
 
