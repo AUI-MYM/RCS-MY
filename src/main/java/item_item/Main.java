@@ -72,16 +72,23 @@ public class Main {
 
     public static void main(String[] args) {
         readNorms();
+        System.out.println("Norm file has been read");
         readItems();
+        System.out.println("Items have been read");
         readTrain();
+        System.out.println("Train data was read");
         computeSimilarity();
+        System.out.println("End of calculation of similarity");
         recommend();
+        System.out.println("End of predicting ratings");
         writeOutput();
+        System.out.println("End of writing the top 5 best prediction");
     }
 
     private static void writeOutput() {
         CSVWriter writer = null;
         CSVReader reader = null;
+        int counter = 0;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
             reader = new CSVReader(new FileReader(mainPath + "submit_user.csv"));
@@ -101,6 +108,7 @@ public class Main {
                 line = reader.readNext();
                 if (count < 5) {
                     String[] items = line[1].split(" ");
+                    counter++;
                     int i = 0;
                     while (count < 5) {
                         int item = Integer.parseInt(items[i]);
@@ -119,6 +127,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("For " + counter + " many users I couldn't predict 5 movies");
     }
 
     private static void recommend() {
@@ -146,7 +155,7 @@ public class Main {
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
-                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 1.0f);
+                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f);
                 }
                 recommendations.add(r);
             }
