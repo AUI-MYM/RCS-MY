@@ -91,7 +91,7 @@ public class Main {
         int counter = 0;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
-            reader = new CSVReader(new FileReader(mainPath + "submit_user.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "submit_best_item_content.csv"));
             String[] entries = "userId#testItems".split("#");
             writer.writeNext(entries);
             reader.readNext();
@@ -138,6 +138,10 @@ public class Main {
             while ((nextLine = reader.readNext()) != null) {
                 int id = Integer.parseInt(nextLine[0]);
                 User u = users.get(id);
+                if (u == null) {
+                    u = new User(id);
+                    users.put(id,u);
+                }
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
                     for (Object key_item_similar : items.get(key).similarities.keySet()) {
@@ -241,7 +245,7 @@ public class Main {
     private static void readTrain() {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "user_sorted_filtered.csv"));
             String[] nextLine;
             int flag = 1;
             User u = new User(1);
@@ -256,6 +260,7 @@ public class Main {
                     u.ratings.put(Integer.parseInt(nextLine[1]), Float.parseFloat(nextLine[2]));
                 }
             }
+            users.put(flag,u);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -60,7 +60,7 @@ public class Main {
         int counter = 0 ;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
-            reader = new CSVReader(new FileReader(mainPath + "submit_user.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "submit_best_item_content.csv"));
             String[] entries = "userId#testItems".split("#");
             writer.writeNext(entries);
             reader.readNext();
@@ -71,7 +71,9 @@ public class Main {
                 Iterator it = theUser.estimated_sorted_ratings.theList.iterator();
                 int count = 0;
                 while (count < 5 && it.hasNext()) {
-                    r.recommendations.add(((Key_Value_Pair) it.next()).key);
+                    Key_Value_Pair pair = (Key_Value_Pair) it.next();
+                    if (r.recommendations.contains(pair.key)) continue;
+                    r.recommendations.add(pair.key);
                     count++;
                 }
                 line = reader.readNext();
@@ -107,13 +109,17 @@ public class Main {
             while ((nextLine = reader.readNext()) != null) {
                 int id = Integer.parseInt(nextLine[0]);
                 User u = users.get(id);
+                if (u == null) {
+                    u = new User(id);
+                    users.put(id,u);
+                }
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
                     for (Object key_item_similar_o : items.get(key).similarities.theList) {
                         Key_Value_Pair key_item_similar = (Key_Value_Pair) key_item_similar_o;
                         if (u.ratings.containsKey(key_item_similar.key)) continue;
                         float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar.key).value;
-                        SimilarityPair pair = u.estimated_ratings.get(key_item_similar);
+                        SimilarityPair pair = u.estimated_ratings.get(key_item_similar.key);
                         if (pair != null) {
                             pair.rating_sum += value;
                             pair.similarity_sum += items.get(key).similarities.get(key_item_similar.key).value;
@@ -125,7 +131,7 @@ public class Main {
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
-                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f);
+                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f /* shrink term*/);
                     u.estimated_sorted_ratings.add((Integer)key, pair.rating_sum);
                 }
                 u.estimated_ratings.clear();
@@ -151,6 +157,7 @@ public class Main {
                 for (Integer key_item_rated : theUser.ratings.keySet()) {
                     if (key_item_rated.equals(key_item)) continue;
                     if (item.ratings.size() > items.get(key_item_rated).ratings.size()) continue;
+                    else if (item.ratings.size() == items.get(key_item_rated).ratings.size() && key_item < key_item_rated) continue;// to eleminate the duplications
                     float rating = item.ratings.get(key_user) * theUser.ratings.get(key_item_rated);
                     obj = temp_similarity.get(key_item_rated);
                     if (obj == null) {
@@ -209,7 +216,7 @@ public class Main {
     private static void readTrain() {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "user_sorted_filtered.csv"));
             String[] nextLine;
             int flag = 1;
             User u = new User(1);
@@ -226,6 +233,7 @@ public class Main {
                 Item item = items.get(Integer.parseInt(nextLine[1]));
                 item.ratings.put(u.user_id, Integer.parseInt(nextLine[2]));
             }
+            users.put(flag,u);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
