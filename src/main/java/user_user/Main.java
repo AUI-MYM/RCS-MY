@@ -87,10 +87,10 @@ public class Main {
             e.printStackTrace();
         }
     }
-
+/*
     private static void try1() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "similarity.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "similarity_10.csv"));
             int id = 1;
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
@@ -115,7 +115,7 @@ public class Main {
                         temp.putAll(otherUser.ratings);
                         temp.keySet().removeAll(theUser.ratings.keySet());
                         for (Integer key : temp.keySet()) {
-                            float rating = (otherUser.ratings.get(key) - sum) * Float.parseFloat(nextLine[i + numberOfSimilarUsers]);
+                            float rating = otherUser.ratings.get(key) * Float.parseFloat(nextLine[i + numberOfSimilarUsers]);
 
                             //theUser.ratings.put(key, (int) rating);
                             if (!theUser.estimated_ratings.containsKey(key))
@@ -138,7 +138,53 @@ public class Main {
             e.printStackTrace();
         }
     }
+*/
+    private static void try3() {
+        try {
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "similarity_50.csv"));
+            int id = 1;
+            String[] nextLine;
+            while ((nextLine = reader.readNext()) != null) {
+                User theUser = users.get(id);
+                if (theUser != null) {
+                    Map<Integer, Float> temp = new HashMap<Integer, Float>();
+                    int numberOfSimilarUsers = 50;
+                    for (int i = 0; i < numberOfSimilarUsers; i++) {
+                        User otherUser = users.get(Integer.parseInt(nextLine[i]));
+                        if (otherUser == null) continue;
+                        if (Integer.parseInt(nextLine[i]) == 0) break;
+                        for (Integer ratingOfSimilarUser : otherUser.ratings.keySet()) {
+                            if (theUser.ratings.containsKey(ratingOfSimilarUser)) continue;
+                            SimilarityPair pair = theUser.estimated_ratings.get(ratingOfSimilarUser);
+                            float similarity_coefficient = Float.parseFloat(nextLine[i + numberOfSimilarUsers]);
+                            if (pair == null) {
+                                pair = new SimilarityPair(otherUser.ratings.get(ratingOfSimilarUser) * similarity_coefficient,
+                                        similarity_coefficient);
+                                theUser.estimated_ratings.put(ratingOfSimilarUser, pair);
+                            } else {
+                                pair.ratingsum += otherUser.ratings.get(ratingOfSimilarUser) * similarity_coefficient;
+                                pair.similaritysum += similarity_coefficient;
+                            }
+                        }
+                    }
+                    for (Integer key : theUser.estimated_ratings.keySet()) {
+                        SimilarityPair pair = theUser.estimated_ratings.get(key);
+                        pair.ratingsum = pair.ratingsum/(pair.similaritysum + 2.0f /*shrink term*/);
+                        theUser.estimated_ratings_sorted.add(key,pair.ratingsum);
+                    }
+                } else {
+                    // TODO
+                }
+                id = id + 1;
+            }
 
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+/*
     private static void try2() {
         try {
             CSVReader reader = new CSVReader(new FileReader(mainPath + "similarity_pearson.csv"));
@@ -190,7 +236,7 @@ public class Main {
             e.printStackTrace();
         }
     }
-
+*/
     private static void readTrain() {
         CSVReader reader = null;
         try {
@@ -290,6 +336,41 @@ public class Main {
             e.printStackTrace();
         }
     }
+    private static void recommend3() {
+        try {
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
+            String[] nextLine;
+            reader.readNext();
+            while ((nextLine = reader.readNext()) != null) {
+                int id = Integer.parseInt(nextLine[0]);
+                User u = users.get(id);
+                Recommendation r = new Recommendation(id);
+                Iterator it = u.estimated_ratings_sorted.theList.iterator();
+                int count = 0;
+                while (it.hasNext() && count < 5) {
+                    Integer key = ((Key_Value_Pair)it.next()).key;
+                    //float rat = u.estimated_ratings_sorted.get(key).value;
+                    //if (rat < 1.9f) break;
+                    r.recommendations.add(key);
+                    count++;
+                }
+                int i = 0;
+                while (count < 5) {
+                    if (!u.ratings.containsKey(top_movies.get(i).movie) &&
+                            !r.recommendations.contains(top_movies.get(i).movie)) {
+                        r.recommendations.add(top_movies.get(i).movie);
+                        count++;
+                    }
+                    i++;
+                }
+                recommendations.add(r);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static void recommend2() {
         try {
@@ -332,10 +413,10 @@ public class Main {
     public static void main(String[] args) {
         readTrain();
         readAvgRatings();
-        //readTop();
-        readOldResults();
-        try2();
-        recommend2();
+        readTop();
+        //readOldResults();
+        try3();
+        recommend3();
         writeOutput();
         System.out.println("I'm done");
     }

@@ -55,15 +55,15 @@ end
 for i = 1:sizes(1)
     for j= (i+1):sizes(1)
         if similarity(i,j) ~= 0
-            similarity(i,j) = similarity(i,j)/ (norms(i)*norms(j));
+            similarity(i,j) = similarity(i,j)/ ((norms(i)*norms(j)) + 2);
             similarity(j,i) = similarity(i,j);
         end
             
     end
 end
 
-similar_users = zeros(size(a,1),20);
-numberofsimilarusers=10;
+similar_users = zeros(size(a,1),100);
+numberofsimilarusers=50;
 for i = 1:sizes(1)
    [list, index] = sort(similarity(i,:), 'descend');
    sizeTemp = size(list(list~=0),2);

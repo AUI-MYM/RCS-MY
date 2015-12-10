@@ -16,6 +16,7 @@ import java.util.*;
  */
 public class Main {
     public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\item-item\\";
+    //public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\test\\";
     private static Map<Integer, Item> items = new HashMap<Integer, Item>();
     static Map<Integer, User> users = new HashMap<Integer, User>();
     static List<Recommendation> recommendations = new ArrayList<Recommendation>();
@@ -131,7 +132,7 @@ public class Main {
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
-                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f /* shrink term*/);
+                    pair.rating_sum = pair.rating_sum / (pair.similarity_sum +2.0f /* shrink term*/);
                     u.estimated_sorted_ratings.add((Integer)key, pair.rating_sum);
                 }
                 u.estimated_ratings.clear();
@@ -217,6 +218,7 @@ public class Main {
         CSVReader reader = null;
         try {
             reader = new CSVReader(new FileReader(mainPath + "user_sorted_filtered.csv"));
+            //reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
             String[] nextLine;
             int flag = 1;
             User u = new User(1);
