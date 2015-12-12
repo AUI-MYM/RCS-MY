@@ -89,6 +89,7 @@ public class Main {
         CSVWriter writer = null;
         CSVReader reader = null;
         int counter = 0;
+        user_user.Main.main(null);
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
             reader = new CSVReader(new FileReader(mainPath + "submit_best_item_content.csv"));
@@ -98,11 +99,12 @@ public class Main {
             String[] line = null;
             for (Recommendation r : recommendations) {
                 User theUser = users.get(r.user);
-                LinkedHashMap list = sortHashMapByValuesD(theUser.estimated_ratings,true);
-                Iterator it = list.keySet().iterator();
+                Iterator it = theUser.estimated_sorted_ratings.theList.iterator();
                 int count = 0;
                 while (count < 5 && it.hasNext()) {
-                    r.recommendations.add((Integer) it.next());
+                    Key_Value_Pair pair = (Key_Value_Pair) it.next();
+                    if (r.recommendations.contains(pair.key)) continue;
+                    r.recommendations.add(pair.key);
                     count++;
                 }
                 line = reader.readNext();
@@ -144,23 +146,26 @@ public class Main {
                 }
                 Recommendation r = new Recommendation(id);
                 for (Object key : u.ratings.keySet()) { //we should sort and get only the top 10 rating of a user
-                    for (Object key_item_similar : items.get(key).similarities.keySet()) {
+                    for (Object key_item_similar_o : items.get(key).similarities.theList) {
+                        Key_Value_Pair key_item_similar = (Key_Value_Pair) key_item_similar_o;
                         if (u.ratings.containsKey(key_item_similar)) continue;
-                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar);
-                        SimilarityPair pair = u.estimated_ratings.get(key_item_similar);
+                        float value = u.ratings.get(key) * items.get(key).similarities.get(key_item_similar.key).value;
+                        SimilarityPair pair = u.estimated_ratings.get(key_item_similar.key);
                         if (pair != null) {
                             pair.rating_sum += value;
-                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar);
+                            pair.similarity_sum += items.get(key).similarities.get(key_item_similar.key).value;
                         } else {
-                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar));
-                            u.estimated_ratings.put((Integer)key_item_similar, pair);
+                            pair = new SimilarityPair(value, items.get(key).similarities.get(key_item_similar.key).value);
+                            u.estimated_ratings.put((Integer) key_item_similar.key, pair);
                         }
                     }
                 }
                 for (Object key : u.estimated_ratings.keySet()) {
                     SimilarityPair pair = u.estimated_ratings.get(key);
                     pair.rating_sum = pair.rating_sum / (pair.similarity_sum + 2.0f);
+                    u.estimated_sorted_ratings.add((Integer)key, pair.rating_sum);
                 }
+                u.estimated_ratings.clear();
                 recommendations.add(r);
             }
             reader.close();
@@ -172,7 +177,7 @@ public class Main {
 
     private static void computeSimilarity() {
         Map<Integer, Float> temp_similarity = new HashMap<Integer, Float>();
-        for (Object key_item : items.keySet()) {//print something
+        for (Integer key_item : items.keySet()) {//print something
             Item item = items.get(key_item);
             //System.out.println("item id: " + key_item.toString());
             temp_similarity.clear();
@@ -192,54 +197,10 @@ public class Main {
             for (Object key : temp_similarity.keySet()) {
                 float value = temp_similarity.get(key);
                 value = value / ((item.norm * items.get(key).norm) + 2.0f /*shrink term */);
-                temp_similarity.put((Integer) key, value);
-            }
-
-            //sort the similarity
-            LinkedHashMap sortedHash = sortHashMapByValuesD(temp_similarity,false);
-            Iterator it = sortedHash.keySet().iterator();
-            int count = 0;
-            while (it.hasNext() && count < 50) {
-                Object key = it.next();
-                item.similarities.put((Integer) key, (Float) sortedHash.get(key));
-                count++;
-            }
-            //System.out.println("item id: " + key_item.toString() + " finished");
-        }
-    }
-
-    public static LinkedHashMap sortHashMapByValuesD(Map passedMap, boolean flag) {
-        List mapKeys = new ArrayList(passedMap.keySet());
-        List mapValues = new ArrayList(passedMap.values());
-        if (flag)
-            Collections.sort(mapValues, new pairComperator());
-        else
-            Collections.sort(mapValues, Collections.reverseOrder());
-        Collections.sort(mapKeys, Collections.reverseOrder());
-
-        LinkedHashMap sortedMap = new LinkedHashMap();
-
-        Iterator valueIt = mapValues.iterator();
-        while (valueIt.hasNext()) {
-            Object val = valueIt.next();
-            Iterator keyIt = mapKeys.iterator();
-
-            while (keyIt.hasNext()) {
-                Object key = keyIt.next();
-                String comp1 = passedMap.get(key).toString();
-                String comp2 = val.toString();
-
-                if (comp1.equals(comp2)) {
-                    passedMap.remove(key);
-                    mapKeys.remove(key);
-                    sortedMap.put((Integer) key,val);
-                    break;
-                }
-
+                setSimilarity((Integer) key, key_item ,value);
             }
 
         }
-        return sortedMap;
     }
 
     private static void readTrain() {
@@ -266,6 +227,10 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private static void setSimilarity(Integer item1, Integer item2, float value) {
+        items.get(item2).similarities.add(item1, value);
+        items.get(item1).similarities.add(item2, value);
     }
 }
 

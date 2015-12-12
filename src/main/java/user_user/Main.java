@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
-    static Map<Integer, User> users = new HashMap<Integer, User>();
-    static List<MovieRating> top_movies = new ArrayList<MovieRating>();
-    static List<Recommendation> recommendations = new ArrayList<Recommendation>();
+    static public Map<Integer, User> users = new HashMap<Integer, User>();
+    static public List<MovieRating> top_movies = new ArrayList<MovieRating>();
+    static public List<Recommendation> recommendations = new ArrayList<Recommendation>();
     private static String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\user-user\\";
 
     public static LinkedHashMap sortHashMapByValuesD(Map passedMap) {
@@ -55,7 +55,7 @@ public class Main {
 
     private static void readOldResults() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "submit4-27-10.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "submit_best_item_content.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -347,7 +347,7 @@ public class Main {
                 Recommendation r = new Recommendation(id);
                 Iterator it = u.estimated_ratings_sorted.theList.iterator();
                 int count = 0;
-                while (it.hasNext() && count < 5) {
+                while (it.hasNext() && count < 2) {
                     Integer key = ((Key_Value_Pair)it.next()).key;
                     //float rat = u.estimated_ratings_sorted.get(key).value;
                     //if (rat < 1.9f) break;
@@ -381,18 +381,11 @@ public class Main {
                 int id = Integer.parseInt(nextLine[0]);
                 User u = users.get(id);
                 Recommendation r = new Recommendation(id);
-                LinkedHashMap l = sortHashMapByValuesD(u.estimated_ratings);
-                Iterator it = l.keySet().iterator();
+                Iterator it = u.estimated_ratings_sorted.theList.iterator();
                 int count = 0;
-                while (it.hasNext() && count < 5) {
-                    Object key = it.next();
-                    float rat = (Float) l.get(key);
-                    // if (rat < 2.9f) break;
-                    r.recommendations.add((Integer) key);
-                    count++;
-                }
+
                 int i = 0;
-                while (count < 5) {
+                while (count < 3) {
                     if (!u.ratings.containsKey(u.old_results.get(i)) &&
                             !r.recommendations.contains(u.old_results.get(i))) {
                         r.recommendations.add(u.old_results.get(i));
@@ -401,6 +394,23 @@ public class Main {
                     i++;
                 }
                 recommendations.add(r);
+                while (it.hasNext() && count < 5) {
+                    Integer key = ((Key_Value_Pair)it.next()).key;
+                    //float rat = u.estimated_ratings_sorted.get(key).value;
+                    //if (rat < 1.9f) break;
+                    if (!r.recommendations.contains(key)) {
+                        r.recommendations.add(key);
+                        count++;
+                    }
+                }
+                while (count < 5) {
+                    if (!u.ratings.containsKey(u.old_results.get(i)) &&
+                            !r.recommendations.contains(u.old_results.get(i))) {
+                        r.recommendations.add(u.old_results.get(i));
+                        count++;
+                    }
+                    i++;
+                }
             }
             reader.close();
 
@@ -413,10 +423,10 @@ public class Main {
     public static void main(String[] args) {
         readTrain();
         readAvgRatings();
-        readTop();
-        //readOldResults();
+        //readTop();
+        readOldResults();
         try3();
-        recommend3();
+        recommend2();
         writeOutput();
         System.out.println("I'm done");
     }

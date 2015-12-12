@@ -11,6 +11,7 @@ import java.util.Map;
 public class User {
     public Map<Integer,Float> ratings;
     public Map<Integer,SimilarityPair> estimated_ratings;
+    public SortedList estimated_sorted_ratings;
     public List<Integer> old_results;
     public int user_id;
     public float avg_rating;
@@ -18,6 +19,7 @@ public class User {
         user_id = i;
         ratings = new HashMap<Integer, Float>();
         estimated_ratings = new HashMap<Integer, SimilarityPair>();
+        estimated_sorted_ratings = new SortedList(20);
         old_results = new ArrayList<Integer>();
     }
 

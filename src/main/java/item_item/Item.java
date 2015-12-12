@@ -1,5 +1,6 @@
 package item_item;
 
+
 import java.util.*;
 
 /**
@@ -8,18 +9,18 @@ import java.util.*;
 public class Item {
     public float norm;
     public int id;
-    public LinkedHashMap<Integer,Float> similarities;
+    public SortedList similarities;
     public List<Feature> feautures;
     public Item(int id) {
         this.id = id;
-        similarities = new LinkedHashMap<Integer, Float>();
+        similarities = new SortedList(50);
         feautures = new ArrayList<Feature>();
     }
 
     public Item(int id, float v) {
         this.id = id;
         this.norm = v;
-        this.similarities = new LinkedHashMap<Integer, Float>();
+        this.similarities = new SortedList(50);
         this.feautures = new ArrayList<Feature>();
     }
 }
