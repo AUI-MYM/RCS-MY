@@ -206,7 +206,7 @@ public class Main {
     private static void readTrain() {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(mainPath + "user_sorted_filtered.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
             String[] nextLine;
             int flag = 1;
             User u = new User(1);
