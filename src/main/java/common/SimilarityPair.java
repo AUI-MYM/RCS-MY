@@ -1,4 +1,4 @@
-package item_item_collaborative;
+package common;
 
 /**
  * Created by MertErgun on 3.11.2015.

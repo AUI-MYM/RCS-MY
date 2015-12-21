@@ -1,6 +1,4 @@
-package item_item_collaborative;
-
-import item_item.Feature;
+package common;
 
 import java.util.*;
 
@@ -15,7 +13,7 @@ public class Item {
     public Map<Integer,Integer> ratings;
     public Item(int id) {
         this.id = id;
-        similarities = new SortedList();
+        similarities = new SortedList(50);
         ratings = new HashMap<Integer, Integer>();
         feautures = new ArrayList<Feature>();
     }
@@ -23,7 +21,7 @@ public class Item {
     public Item(int id, float v) {
         this.id = id;
         this.norm = v;
-        this.similarities = new SortedList();
+        this.similarities = new SortedList(50);
         this.feautures = new ArrayList<Feature>();
         ratings = new HashMap<Integer, Integer>();
     }

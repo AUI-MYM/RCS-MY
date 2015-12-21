@@ -2,9 +2,9 @@ package item_item;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import common.*;
 import org.apache.commons.lang3.StringUtils;
 import user_user.Recommendation;
-import item_item.Item;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -19,7 +19,7 @@ public class Main {
     public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\item-item\\";
     private static Map<Integer, Item> items = new HashMap<Integer, Item>();
     private static Map<Integer, Feature> features = new HashMap<Integer, Feature>();
-    static Map<Integer, User> users = new HashMap<Integer, User>();
+    public static Map<Integer, User> users = new HashMap<Integer, User>();
     static List<Recommendation> recommendations = new ArrayList<Recommendation>();
 
     private static void readItems() {
@@ -81,7 +81,7 @@ public class Main {
         System.out.println("End of calculation of similarity");
         recommend();
         System.out.println("End of predicting ratings");
-        writeOutput();
+        //writeOutput();
         System.out.println("End of writing the top 5 best prediction");
     }
 
@@ -89,7 +89,6 @@ public class Main {
         CSVWriter writer = null;
         CSVReader reader = null;
         int counter = 0;
-        user_user.Main.main(null);
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',');
             reader = new CSVReader(new FileReader(mainPath + "submit_best_item_content.csv"));
@@ -134,7 +133,7 @@ public class Main {
 
     private static void recommend() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {

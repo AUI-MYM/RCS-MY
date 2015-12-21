@@ -2,6 +2,10 @@ package item_item_collaborative;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import common.Item;
+import common.Key_Value_Pair;
+import common.SimilarityPair;
+import common.User;
 import org.apache.commons.lang3.StringUtils;
 import user_user.Recommendation;
 
@@ -18,7 +22,7 @@ public class Main {
     public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\item-item\\";
     //public static final String mainPath = "C:\\Users\\MertErgun\\IdeaProjects\\RCS\\input files\\test\\";
     private static Map<Integer, Item> items = new HashMap<Integer, Item>();
-    static Map<Integer, User> users = new HashMap<Integer, User>();
+    public static Map<Integer, User> users = new HashMap<Integer, User>();
     static List<Recommendation> recommendations = new ArrayList<Recommendation>();
 
     private static void readNorms(String filename) {
@@ -77,7 +81,7 @@ public class Main {
                     r.recommendations.add(pair.key);
                     count++;
                 }
-                line = reader.readNext();
+                line = reader.readNext();/*
                 if (count < 5) {
                     String[] items = line[1].split(" ");
                     int i = 0;
@@ -90,7 +94,7 @@ public class Main {
                         }
                         i++;
                     }
-                }
+                }*/
                 String s = "" + r.user + "," + StringUtils.join(r.recommendations.toArray(), ' ');
                 writer.writeNext(s.split(","));
             }
@@ -104,7 +108,7 @@ public class Main {
 
     private static void recommend() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -217,7 +221,7 @@ public class Main {
     private static void readTrain() {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(mainPath + "user_sorted_filtered.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
             //reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
             String[] nextLine;
             int flag = 1;

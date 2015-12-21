@@ -1,4 +1,6 @@
-package item_item;
+package common;
+
+import common.Item;
 
 import java.util.ArrayList;
 import java.util.List;
