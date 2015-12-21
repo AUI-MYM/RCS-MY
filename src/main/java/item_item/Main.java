@@ -133,7 +133,7 @@ public class Main {
 
     private static void recommend() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {

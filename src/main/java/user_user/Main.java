@@ -251,7 +251,7 @@ public class Main {
     private static void readTrain() {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(mainPath + "sorted_train_set.csv"));
+            reader = new CSVReader(new FileReader(mainPath + "user_sorted.csv"));
             String[] nextLine;
             int flag = 1;
             User u = new User(1);
@@ -297,10 +297,10 @@ public class Main {
         CSVWriter writer = null;
         try {
             writer = new CSVWriter(new FileWriter(mainPath + "submit.csv"), ',', '\0', '\0');
-            //String[] entries = "userId#testItems".split("#");
-            //writer.writeNext(entries);
+            String[] entries = "userId#testItems".split("#");
+            writer.writeNext(entries);
             for (Recommendation r : recommendations) {
-                String s = "" + r.user + "," + StringUtils.join(r.recommendations.toArray(), ',');
+                String s = "" + r.user + "," + StringUtils.join(r.recommendations.toArray(), ' ');
                 writer.writeNext(s.split(","));
             }
 
@@ -313,7 +313,7 @@ public class Main {
 
     private static void recommend1() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -350,7 +350,7 @@ public class Main {
 
     private static void recommend3() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -386,7 +386,7 @@ public class Main {
 
     private static void recommend2() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -454,7 +454,7 @@ public class Main {
         int count_overall = 0;
         try {
             item_item.Main.main(null);
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -556,7 +556,7 @@ public class Main {
         try {
             item_item.Main.main(null);
             item_item_collaborative.Main.main(null);
-            CSVReader reader = new CSVReader(new FileReader(mainPath + "test_ev.csv"));
+            CSVReader reader = new CSVReader(new FileReader(mainPath + "test.csv"));
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
@@ -596,11 +596,11 @@ public class Main {
                         flag = true;
                     }
                     if (pair2 != null) {
-                        theList.add(pair2.key, pair2.value * 1.1f);
+                        theList.add(pair2.key, pair2.value * 1.3f);
                         flag = true;
                     }
                     if (pair3 != null) {
-                        //theList.add(pair3.key,pair3.value*0.85f);
+                        //theList.add(pair3.key,pair3.value*0.0f);
                         flag = true;
                     }
                     if (flag) count++;
